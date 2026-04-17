@@ -87,6 +87,35 @@
     </dependencyManagement>
 
     <build>
+        <plugins>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-checkstyle-plugin</artifactId>
+            <version>3.1.2</version>
+            <configuration>
+                <configLocation>checkstyle.xml</configLocation>
+                <failOnViolation>true</failOnViolation>
+                <logViolationsToConsole>true</logViolationsToConsole>
+                <includeTestSourceDirectory>true</includeTestSourceDirectory>
+            </configuration>
+            <executions>
+                <execution>
+                    <goals>
+                        <goal>check</goal>
+                    </goals>
+                    <phase>compile</phase>
+                </execution>
+            </executions>
+            <dependencies>
+                <dependency>
+                    <groupId>com.puppycrawl.tools</groupId>
+                    <artifactId>checkstyle</artifactId>
+                    <version>10.3</version>
+                </dependency>
+            </dependencies>
+        </plugin>
+        </plugins>
+
         <pluginManagement>
             <plugins>
                 <plugin>
@@ -94,16 +123,19 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>${maven-compiler-plugin.version}</version>
                 </plugin>
+
                 <plugin>
                     <groupId>org.apache.avro</groupId>
                     <artifactId>avro-maven-plugin</artifactId>
                     <version>${avro-maven-plugin.version}</version>
                 </plugin>
+
                 <plugin>
                     <groupId>io.github.ascopes</groupId>
                     <artifactId>protobuf-maven-plugin</artifactId>
                     <version>${protobuf-plugin.version}</version>
                 </plugin>
+
             </plugins>
         </pluginManagement>
     </build>
