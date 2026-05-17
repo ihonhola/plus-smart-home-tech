@@ -19,6 +19,9 @@
         <module>telemetry</module>
         <module>infra</module>
         <module>commerce</module>
+        <module>echo-client</module>
+        <module>echo-server</module>
+        <module>hub-router</module>
     </modules>
 
     <properties>

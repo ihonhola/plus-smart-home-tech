@@ -1,4 +1,4 @@
-package ru.yandex.practicum.collector.controller;
+/*package ru.yandex.practicum.collector.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -30,4 +30,4 @@ public class CollectorController {
         log.info("Received hub event: {}", event);
         eventSender.sendHubEvent(event);
     }
-}
+}*/

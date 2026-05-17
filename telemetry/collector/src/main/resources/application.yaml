@@ -1,0 +1,18 @@
+server:
+  port: 8080 # оставляем для Spring Boot актуатора или будущего REST
+
+grpc:
+  server:
+    port: 9091
+    enableKeepAlive: true
+    keepAliveWithoutCalls: true
+    negotiationType: plaintext
+
+spring:
+  application:
+    name: collector
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: ru.yandex.practicum.collector.serialization.AvroSerializer
