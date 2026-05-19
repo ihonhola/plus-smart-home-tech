@@ -1,0 +1,6 @@
+spring:
+  application:
+    name: aggregator
+logging:
+  level:
+    ru.yandex.practicum.aggregator: DEBUG
