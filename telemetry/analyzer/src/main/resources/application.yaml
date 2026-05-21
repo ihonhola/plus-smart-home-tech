@@ -1,0 +1,36 @@
+spring:
+  application:
+    name: analyzer
+  datasource:
+    url: jdbc:postgresql://localhost:5432/smart_home
+    username: smart
+    password: smart
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+grpc:
+  client:
+    hub-router:
+      address: 'static://localhost:59090'
+      enableKeepAlive: true
+      keepAliveWithoutCalls: true
+      negotiationType: plaintext
+
+analyzer:
+  kafka:
+    snapshot-consumer:
+      bootstrap-servers: localhost:9092
+      group-id: analyzer-snapshot-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: ru.yandex.practicum.analyzer.deserializer.SnapshotDeserializer
+    hub-consumer:
+      bootstrap-servers: localhost:9092
+      group-id: analyzer-hub-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: ru.yandex.practicum.analyzer.deserializer.HubEventDeserializer

@@ -1,7 +1,7 @@
 grpc:
   client:
     collector:
-      address: 'static://127.0.0.1:9091'
+      address: 'static://127.0.0.1:59091'
       enableKeepAlive: true
       keepAliveWithoutCalls: true
       negotiationType: plaintext

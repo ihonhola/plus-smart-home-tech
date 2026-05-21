@@ -12,6 +12,7 @@ import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.errors.WakeupException;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.aggregator.config.KafkaProperties;
 import ru.yandex.practicum.aggregator.service.SnapshotAggregator;
 import ru.yandex.practicum.kafka.telemetry.event.SensorEventAvro;
 import ru.yandex.practicum.kafka.telemetry.event.SensorsSnapshotAvro;
@@ -27,6 +28,7 @@ import java.util.Optional;
 public class AggregationStarter {
 
     private final SnapshotAggregator snapshotAggregator;
+    private final KafkaProperties kafkaProperties;
     private Consumer<String, SensorEventAvro> consumer;
     private Producer<String, SpecificRecordBase> producer;
 
@@ -54,10 +56,9 @@ public class AggregationStarter {
                         });
                     });
                 }
-                consumer.commitSync(); // фиксируем смещения после обработки
+                consumer.commitSync();
             }
         } catch (WakeupException ignored) {
-            // игнорируем, завершаем
         } catch (Exception e) {
             log.error("Ошибка в цикле агрегации", e);
         } finally {
@@ -67,18 +68,20 @@ public class AggregationStarter {
 
     private void initConsumer() {
         Properties props = new Properties();
-        props.put("bootstrap.servers", "localhost:9092");
-        props.put("group.id", "aggregator-group");
-        props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-        props.put("value.deserializer", "ru.yandex.practicum.aggregator.deserializer.SensorEventDeserializer");
+        KafkaProperties.Consumer c = kafkaProperties.getConsumer();
+        props.put("bootstrap.servers", c.getBootstrapServers());
+        props.put("group.id", c.getGroupId());
+        props.put("key.deserializer", c.getKeyDeserializer());
+        props.put("value.deserializer", c.getValueDeserializer());
         consumer = new KafkaConsumer<>(props);
     }
 
     private void initProducer() {
         Properties props = new Properties();
-        props.put("bootstrap.servers", "localhost:9092");
-        props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-        props.put("value.serializer", "ru.yandex.practicum.aggregator.serialization.AvroSerializer");
+        KafkaProperties.Producer p = kafkaProperties.getProducer();
+        props.put("bootstrap.servers", p.getBootstrapServers());
+        props.put("key.serializer", p.getKeySerializer());
+        props.put("value.serializer", p.getValueSerializer());
         producer = new KafkaProducer<>(props);
     }
 
