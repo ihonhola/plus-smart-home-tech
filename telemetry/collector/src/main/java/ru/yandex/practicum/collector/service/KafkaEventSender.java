@@ -8,6 +8,7 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.kafka.telemetry.event.HubEventAvro;
 import ru.yandex.practicum.kafka.telemetry.event.SensorEventAvro;
+import java.util.concurrent.ExecutionException;
 
 
 @Slf4j
@@ -23,27 +24,41 @@ public class KafkaEventSender {
     public void sendSensorEvent(SensorEventAvro event) {
         ProducerRecord<String, SpecificRecordBase> record =
                 new ProducerRecord<>(SENSORS_TOPIC, event.getHubId(), event);
-        kafkaProducer.send(record, (metadata, exception) -> {
+        /*kafkaProducer.send(record, (metadata, exception) -> {
             if (exception != null) {
                 log.error("Failed to send sensor event: {}", event, exception);
             } else {
                 log.debug("Sensor event sent: topic={}, partition={}, offset={}",
                         metadata.topic(), metadata.partition(), metadata.offset());
             }
-        });
+        });*/
+        try {
+        kafkaProducer.send(record).get(); // блокируемся до подтверждения записи
+        log.debug("Sensor event sent: hubId={}, sensorId={}", event.getHubId(), event.getId());
+        } catch (InterruptedException | ExecutionException e) {
+        log.error("Failed to send sensor event: {}", event, e);
+        throw new RuntimeException(e); // прерываем gRPC с ошибкой
+        }
     }
 
     public void sendHubEvent(HubEventAvro event) {
         ProducerRecord<String, SpecificRecordBase> record =
                 new ProducerRecord<>(HUBS_TOPIC, event.getHubId(), event);
-        kafkaProducer.send(record, (metadata, exception) -> {
+        /*kafkaProducer.send(record, (metadata, exception) -> {
             if (exception != null) {
                 log.error("Failed to send hub event: {}", event, exception);
             } else {
                 log.debug("Hub event sent: topic={}, partition={}, offset={}",
                         metadata.topic(), metadata.partition(), metadata.offset());
             }
-        });
+        });*/
+        try {
+            kafkaProducer.send(record).get();
+            log.debug("Hub event sent: hubId={}, type={}", event.getHubId(), event.getPayload().getClass().getSimpleName());
+        } catch (InterruptedException | ExecutionException e) {
+            log.error("Failed to send hub event: {}", event, e);
+            throw new RuntimeException(e);
+        }
     }
 
     /*public void sendSensorEvent(SensorEvent event) {
