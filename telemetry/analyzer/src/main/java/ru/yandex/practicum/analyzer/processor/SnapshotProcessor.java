@@ -38,6 +38,7 @@ import java.util.Properties;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@Transactional
 public class SnapshotProcessor {
     private final KafkaConsumerProperties properties;
     private final ScenarioRepository scenarioRepository;
@@ -77,7 +78,6 @@ public class SnapshotProcessor {
         }
     }
 
-    @Transactional
     private void processSnapshot(SensorsSnapshotAvro snapshot) {
         String hubId = snapshot.getHubId();
         log.debug("Получен снапшот для хаба {}", hubId);
@@ -142,6 +142,7 @@ public class SnapshotProcessor {
             }
             case "TEMPERATURE" -> {
                 if (data instanceof TemperatureSensorAvro temp) yield temp.getTemperatureC();
+                if (data instanceof ClimateSensorAvro climate) yield climate.getTemperatureC();
                 throw new IllegalStateException("Неверный тип данных для TEMPERATURE");
             }
             case "CO2LEVEL" -> {
