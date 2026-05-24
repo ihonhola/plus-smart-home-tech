@@ -6,34 +6,9 @@ import org.apache.avro.specific.SpecificRecordBase;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.collector.model.hub.DeviceAddedEvent;
-import ru.yandex.practicum.collector.model.hub.DeviceRemovedEvent;
-import ru.yandex.practicum.collector.model.hub.HubEvent;
-import ru.yandex.practicum.collector.model.hub.ScenarioAddedEvent;
-import ru.yandex.practicum.collector.model.hub.ScenarioRemovedEvent;
-import ru.yandex.practicum.collector.model.sensor.ClimateSensorEvent;
-import ru.yandex.practicum.collector.model.sensor.LightSensorEvent;
-import ru.yandex.practicum.collector.model.sensor.MotionSensorEvent;
-import ru.yandex.practicum.collector.model.sensor.SensorEvent;
-import ru.yandex.practicum.collector.model.sensor.SwitchSensorEvent;
-import ru.yandex.practicum.collector.model.sensor.TemperatureSensorEvent;
-import ru.yandex.practicum.kafka.telemetry.event.ActionTypeAvro;
-import ru.yandex.practicum.kafka.telemetry.event.ClimateSensorAvro;
-import ru.yandex.practicum.kafka.telemetry.event.ConditionOperationAvro;
-import ru.yandex.practicum.kafka.telemetry.event.ConditionTypeAvro;
-import ru.yandex.practicum.kafka.telemetry.event.DeviceActionAvro;
-import ru.yandex.practicum.kafka.telemetry.event.DeviceAddedEventAvro;
-import ru.yandex.practicum.kafka.telemetry.event.DeviceRemovedEventAvro;
-import ru.yandex.practicum.kafka.telemetry.event.DeviceTypeAvro;
 import ru.yandex.practicum.kafka.telemetry.event.HubEventAvro;
-import ru.yandex.practicum.kafka.telemetry.event.LightSensorAvro;
-import ru.yandex.practicum.kafka.telemetry.event.MotionSensorAvro;
-import ru.yandex.practicum.kafka.telemetry.event.ScenarioAddedEventAvro;
-import ru.yandex.practicum.kafka.telemetry.event.ScenarioConditionAvro;
-import ru.yandex.practicum.kafka.telemetry.event.ScenarioRemovedEventAvro;
 import ru.yandex.practicum.kafka.telemetry.event.SensorEventAvro;
-import ru.yandex.practicum.kafka.telemetry.event.SwitchSensorAvro;
-import ru.yandex.practicum.kafka.telemetry.event.TemperatureSensorAvro;
+import java.util.concurrent.ExecutionException;
 
 
 @Slf4j
@@ -46,7 +21,47 @@ public class KafkaEventSender {
     private static final String SENSORS_TOPIC = "telemetry.sensors.v1";
     private static final String HUBS_TOPIC = "telemetry.hubs.v1";
 
-    public void sendSensorEvent(SensorEvent event) {
+    public void sendSensorEvent(SensorEventAvro event) {
+        ProducerRecord<String, SpecificRecordBase> record =
+                new ProducerRecord<>(SENSORS_TOPIC, event.getHubId(), event);
+        /*kafkaProducer.send(record, (metadata, exception) -> {
+            if (exception != null) {
+                log.error("Failed to send sensor event: {}", event, exception);
+            } else {
+                log.debug("Sensor event sent: topic={}, partition={}, offset={}",
+                        metadata.topic(), metadata.partition(), metadata.offset());
+            }
+        });*/
+        try {
+        kafkaProducer.send(record).get(); // блокируемся до подтверждения записи
+        log.debug("Sensor event sent: hubId={}, sensorId={}", event.getHubId(), event.getId());
+        } catch (InterruptedException | ExecutionException e) {
+        log.error("Failed to send sensor event: {}", event, e);
+        throw new RuntimeException(e); // прерываем gRPC с ошибкой
+        }
+    }
+
+    public void sendHubEvent(HubEventAvro event) {
+        ProducerRecord<String, SpecificRecordBase> record =
+                new ProducerRecord<>(HUBS_TOPIC, event.getHubId(), event);
+        /*kafkaProducer.send(record, (metadata, exception) -> {
+            if (exception != null) {
+                log.error("Failed to send hub event: {}", event, exception);
+            } else {
+                log.debug("Hub event sent: topic={}, partition={}, offset={}",
+                        metadata.topic(), metadata.partition(), metadata.offset());
+            }
+        });*/
+        try {
+            kafkaProducer.send(record).get();
+            log.debug("Hub event sent: hubId={}, type={}", event.getHubId(), event.getPayload().getClass().getSimpleName());
+        } catch (InterruptedException | ExecutionException e) {
+            log.error("Failed to send hub event: {}", event, e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    /*public void sendSensorEvent(SensorEvent event) {
         SensorEventAvro avroEvent = mapToAvro(event);
         ProducerRecord<String, SpecificRecordBase> record =
                 new ProducerRecord<>(SENSORS_TOPIC, avroEvent.getHubId(), avroEvent);
@@ -150,5 +165,5 @@ public class KafkaEventSender {
                 .setTimestamp(event.getTimestamp())
                 .setPayload(payload)
                 .build();
-    }
+    }*/
 }
