@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 @Getter @Setter
 @Component
-@ConfigurationProperties(prefix = "aggregator.kafka")
+@ConfigurationProperties("aggregator.kafka")
 public class KafkaProperties {
     private Consumer consumer = new Consumer();
     private Producer producer = new Producer();
