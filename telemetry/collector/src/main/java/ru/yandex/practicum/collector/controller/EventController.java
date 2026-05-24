@@ -42,24 +42,6 @@ public class EventController extends CollectorControllerGrpc.CollectorController
         this.kafkaEventSender = kafkaEventSender;
     }
 
-    /*@Override
-    public void collectSensorEvent(SensorEventProto request, StreamObserver<Empty> responseObserver) {
-        try {
-            log.info("Received sensor event: id={}, hubId={}, payloadCase={}",
-                    request.getId(), request.getHubId(), request.getPayloadCase());
-            kafkaEventSender.sendSensorEvent(mapper.mapSensorEvent(request));
-            responseObserver.onNext(Empty.getDefaultInstance());
-            responseObserver.onCompleted();
-        } catch (Exception e) {
-            log.error("Error processing sensor event", e);
-            responseObserver.onError(new StatusRuntimeException(
-                    Status.INTERNAL
-                            .withDescription(e.getMessage())
-                            .withCause(e)
-            ));
-        }
-    }*/
-
     @Override
     public void collectSensorEvent(SensorEventProto request, StreamObserver<Empty> responseObserver) {
         try {

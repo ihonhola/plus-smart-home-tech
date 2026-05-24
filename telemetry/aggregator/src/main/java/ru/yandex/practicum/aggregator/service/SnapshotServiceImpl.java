@@ -13,7 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 @Component
-public class SnapshotAggregator {
+public class SnapshotServiceImpl implements SnapshotService {
 
     private final Map<String, SensorsSnapshotAvro> snapshots = new ConcurrentHashMap<>();
 
@@ -22,6 +22,7 @@ public class SnapshotAggregator {
      * @param event событие датчика
      * @return Optional с обновлённым снапшотом, если состояние изменилось, иначе empty
      */
+    @Override
     public Optional<SensorsSnapshotAvro> updateState(SensorEventAvro event) {
         String hubId = event.getHubId();
         String sensorId = event.getId();

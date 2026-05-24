@@ -13,7 +13,7 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.errors.WakeupException;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.aggregator.config.KafkaProperties;
-import ru.yandex.practicum.aggregator.service.SnapshotAggregator;
+import ru.yandex.practicum.aggregator.service.SnapshotService;
 import ru.yandex.practicum.kafka.telemetry.event.SensorEventAvro;
 import ru.yandex.practicum.kafka.telemetry.event.SensorsSnapshotAvro;
 
@@ -27,7 +27,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class AggregationStarter {
 
-    private final SnapshotAggregator snapshotAggregator;
+    private final SnapshotService snapshotService;
     private final KafkaProperties kafkaProperties;
     private Consumer<String, SensorEventAvro> consumer;
     private Producer<String, SpecificRecordBase> producer;
@@ -43,7 +43,7 @@ public class AggregationStarter {
                 for (ConsumerRecord<String, SensorEventAvro> record : records) {
                     SensorEventAvro event = record.value();
                     log.debug("Получено событие датчика: hubId={}, sensorId={}", event.getHubId(), event.getId());
-                    Optional<SensorsSnapshotAvro> updated = snapshotAggregator.updateState(event);
+                    Optional<SensorsSnapshotAvro> updated = snapshotService.updateState(event);
                     updated.ifPresent(snapshot -> {
                         ProducerRecord<String, SpecificRecordBase> producerRecord =
                                 new ProducerRecord<>("telemetry.snapshots.v1", snapshot.getHubId(), snapshot);
