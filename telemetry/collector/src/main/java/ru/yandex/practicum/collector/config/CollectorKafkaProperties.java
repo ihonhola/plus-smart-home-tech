@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 @Getter
 @Setter
 @Component
-@ConfigurationProperties("collector.kafka.producer")
+@ConfigurationProperties(prefix = "collector.kafka.producer")
 public class CollectorKafkaProperties {
     private String bootstrapServers;
     private String keySerializer;
