@@ -1,23 +1,11 @@
-server:
-  port: 8080
-
-grpc:
-  server:
-    port: 59091
-    enableKeepAlive: true
-    keepAliveWithoutCalls: true
-    negotiationType: plaintext
-
 spring:
   application:
     name: collector
-
-# Новые настройки Kafka для Collector
-collector:
-  kafka:
-    producer:
-      bootstrap-servers: localhost:9092
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: ru.yandex.practicum.collector.serialization.AvroSerializer
-      acks: all
-      retries: 3
+  config:
+    import: configserver:http://localhost:8888
+  cloud:
+    config:
+      fail-fast: true
+      retry:
+        useRandomPolicy: true
+        max-interval: 6000
