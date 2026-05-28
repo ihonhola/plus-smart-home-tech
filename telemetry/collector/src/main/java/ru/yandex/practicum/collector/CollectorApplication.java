@@ -7,10 +7,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.apache.kafka.clients.producer.Producer;
 
 import jakarta.annotation.PreDestroy;
-import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 
 @SpringBootApplication
-@ConfigurationPropertiesScan
 public class CollectorApplication {
 
     @Autowired

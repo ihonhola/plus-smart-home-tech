@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 @Getter
 @Setter
-@ConfigurationProperties("analyzer.kafka")
+@ConfigurationProperties(prefix = "analyzer.kafka")
 @Component
 public class KafkaConsumerProperties {
     private ConsumerConfig snapshotConsumer = new ConsumerConfig();

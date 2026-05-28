@@ -43,21 +43,6 @@
             <groupId>org.apache.kafka</groupId>
             <artifactId>kafka-clients</artifactId>
         </dependency>
-
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-config</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.retry</groupId>
-            <artifactId>spring-retry</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
-        </dependency>
         <!-- Сгенерированные схемы Avro и Protobuf -->
         <dependency>
             <groupId>ru.yandex.practicum</groupId>
@@ -70,7 +55,6 @@
             <artifactId>proto-schemas</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
-
         <!-- gRPC клиент для HubRouter -->
         <dependency>
             <groupId>net.devh</groupId>
