@@ -1,9 +1,12 @@
 package ru.yandex.practicum.shoppingcart.service;
 
 import feign.FeignException;
+import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 import ru.yandex.practicum.interaction.client.ShoppingStoreClient;
 import ru.yandex.practicum.interaction.client.WarehouseClient;
 import ru.yandex.practicum.interaction.dto.ChangeProductQuantityRequest;
@@ -59,6 +62,9 @@ public class ShoppingCartService {
         } catch (FeignException.BadRequest e) {
             throw new ProductInShoppingCartLowQuantityInWarehouse(
                     "Not enough products in warehouse for cart " + cart.getShoppingCartId());
+        } catch (FeignException | CallNotPermittedException e) {
+            // склад недоступен, возвращаем 503
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Warehouse is currently unavailable");
         }
 
         // если проверка прошла – добавляем товары
