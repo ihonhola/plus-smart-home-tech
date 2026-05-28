@@ -1,4 +1,4 @@
-package ru.yandex.practicum.warehouse.exception;
+package ru.yandex.practicum.interaction.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;

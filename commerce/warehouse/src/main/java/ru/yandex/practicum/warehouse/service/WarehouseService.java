@@ -11,7 +11,7 @@ import ru.yandex.practicum.interaction.dto.NewProductInWarehouseRequest;
 import ru.yandex.practicum.interaction.dto.ShoppingCartDto;
 import ru.yandex.practicum.interaction.enums.QuantityState;
 import ru.yandex.practicum.warehouse.exception.NoSpecifiedProductInWarehouseException;
-import ru.yandex.practicum.warehouse.exception.ProductInShoppingCartLowQuantityInWarehouse;
+import ru.yandex.practicum.interaction.exception.ProductInShoppingCartLowQuantityInWarehouse;
 import ru.yandex.practicum.warehouse.exception.SpecifiedProductAlreadyInWarehouseException;
 import ru.yandex.practicum.warehouse.model.WarehouseProduct;
 import ru.yandex.practicum.warehouse.model.WarehouseProduct.Dimension;

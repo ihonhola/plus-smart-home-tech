@@ -11,7 +11,7 @@ import ru.yandex.practicum.interaction.dto.ShoppingCartDto;
 import ru.yandex.practicum.shoppingcart.exception.NoProductsInShoppingCartException;
 import ru.yandex.practicum.shoppingcart.model.ShoppingCart;
 import ru.yandex.practicum.shoppingcart.repository.ShoppingCartRepository;
-import ru.yandex.practicum.warehouse.exception.ProductInShoppingCartLowQuantityInWarehouse;
+import ru.yandex.practicum.interaction.exception.ProductInShoppingCartLowQuantityInWarehouse;
 
 import java.util.HashMap;
 import java.util.List;
