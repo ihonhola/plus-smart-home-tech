@@ -8,7 +8,10 @@ import lombok.Setter;
 
 import java.util.UUID;
 
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class ChangeProductQuantityRequest {
     @NotNull
     private UUID productId;

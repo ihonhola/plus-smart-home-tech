@@ -9,7 +9,10 @@ import lombok.Setter;
 
 import java.util.UUID;
 
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class AddProductToWarehouseRequest {
     @NotNull
     private UUID productId;

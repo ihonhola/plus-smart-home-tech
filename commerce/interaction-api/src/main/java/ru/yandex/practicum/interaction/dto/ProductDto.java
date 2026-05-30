@@ -13,7 +13,11 @@ import ru.yandex.practicum.interaction.enums.ProductState;
 import ru.yandex.practicum.interaction.enums.QuantityState;
 import java.util.UUID;
 
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class ProductDto {
     private UUID productId;      // null при создании
 

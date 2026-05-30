@@ -8,8 +8,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor
-@Valid @NotNull
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Valid
+@NotNull
 public class DimensionDto {
     @Min(1)
     private double width;

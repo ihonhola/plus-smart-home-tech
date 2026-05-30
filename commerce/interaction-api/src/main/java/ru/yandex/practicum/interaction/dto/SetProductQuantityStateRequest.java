@@ -9,7 +9,10 @@ import ru.yandex.practicum.interaction.enums.QuantityState;
 
 import java.util.UUID;
 
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class SetProductQuantityStateRequest {
     @NotNull
     private UUID productId;

@@ -62,11 +62,6 @@ public class ShoppingStoreController implements ShoppingStoreClient {
         return productService.removeProduct(productId);
     }
 
-    /*@PostMapping("/quantityState")
-    public Boolean setProductQuantityState(@Valid @RequestBody SetProductQuantityStateRequest request) {
-        return productService.setQuantityState(request);
-    }*/
-
     @Override
     @PostMapping("/quantityState")
     public Boolean setProductQuantityState(@RequestParam UUID productId,

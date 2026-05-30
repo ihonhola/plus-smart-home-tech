@@ -10,7 +10,11 @@ import lombok.Setter;
 import java.util.Map;
 import java.util.UUID;
 
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class ShoppingCartDto {
     @NotNull
     private UUID shoppingCartId;
