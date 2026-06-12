@@ -1,34 +1,40 @@
 package ru.yandex.practicum.warehouse.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.yandex.practicum.interaction.client.ShoppingStoreClient;
 import ru.yandex.practicum.interaction.dto.AddProductToWarehouseRequest;
 import ru.yandex.practicum.interaction.dto.AddressDto;
+import ru.yandex.practicum.interaction.dto.AssemblyProductsForOrderRequest;
 import ru.yandex.practicum.interaction.dto.BookedProductsDto;
 import ru.yandex.practicum.interaction.dto.NewProductInWarehouseRequest;
+import ru.yandex.practicum.interaction.dto.ShippedToDeliveryRequest;
 import ru.yandex.practicum.interaction.dto.ShoppingCartDto;
 import ru.yandex.practicum.interaction.enums.QuantityState;
 import ru.yandex.practicum.warehouse.exception.NoSpecifiedProductInWarehouseException;
 import ru.yandex.practicum.interaction.exception.ProductInShoppingCartLowQuantityInWarehouse;
+import ru.yandex.practicum.warehouse.exception.OrderBookingNotFoundException;
+import ru.yandex.practicum.warehouse.exception.ProductInShoppingCartNotInWarehouse;
 import ru.yandex.practicum.warehouse.exception.SpecifiedProductAlreadyInWarehouseException;
+import ru.yandex.practicum.warehouse.model.OrderBooking;
 import ru.yandex.practicum.warehouse.model.WarehouseProduct;
 import ru.yandex.practicum.warehouse.model.WarehouseProduct.Dimension;
+import ru.yandex.practicum.warehouse.repository.OrderBookingRepository;
 import ru.yandex.practicum.warehouse.repository.WarehouseProductRepository;
-
 import java.security.SecureRandom;
 import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class WarehouseService {
 
     private final WarehouseProductRepository warehouseRepository;
-    private final ShoppingStoreClient storeClient;
+    private final OrderBookingRepository orderBookingRepository;
 
     private static final String[] ADDRESSES = {"ADDRESS_1", "ADDRESS_2"};
     private static final String CURRENT_ADDRESS =
@@ -60,12 +66,6 @@ public class WarehouseService {
                 .orElseThrow(() -> new NoSpecifiedProductInWarehouseException("Product not found in warehouse"));
         product.setQuantity(product.getQuantity() + request.getQuantity());
         warehouseRepository.save(product);
-/*
-        // обновляем состояние количества в магазине (через Feign)
-        storeClient.setProductQuantityState(
-                request.getProductId(),
-                getQuantityState(product.getQuantity()).name()
-        );*/
     }
 
     private QuantityState getQuantityState(long quantity) {
@@ -112,6 +112,78 @@ public class WarehouseService {
                 .street(CURRENT_ADDRESS)
                 .house(CURRENT_ADDRESS)
                 .flat(CURRENT_ADDRESS)
+                .build();
+    }
+
+    public BookedProductsDto assemblyProductsForOrder(AssemblyProductsForOrderRequest request) {
+        // Проверяем наличие и уменьшаем остатки
+        Map<UUID, Long> products = request.getProducts();
+        for (Map.Entry<UUID, Long> entry : products.entrySet()) {
+            UUID productId = entry.getKey();
+            long requiredQty = entry.getValue();
+            WarehouseProduct wp = warehouseRepository.findByProductId(productId)
+                    .orElseThrow(() -> new NoSpecifiedProductInWarehouseException("Product not found in warehouse: " + productId));
+            if (wp.getQuantity() < requiredQty) {
+                throw new ProductInShoppingCartLowQuantityInWarehouse("Not enough quantity for product " + productId);
+            }
+            wp.setQuantity(wp.getQuantity() - requiredQty);
+            warehouseRepository.save(wp);
+        }
+
+        // Рассчитываем характеристики (вес, объём, хрупкость)
+        BookedProductsDto booked = calculateBookedProducts(products);
+
+        // Сохраняем запись о бронировании
+        OrderBooking booking = OrderBooking.builder()
+                .orderId(request.getOrderId())
+                .products(products)
+                .deliveryWeight(booked.getDeliveryWeight())
+                .deliveryVolume(booked.getDeliveryVolume())
+                .fragile(booked.isFragile())
+                .build();
+        orderBookingRepository.save(booking);
+
+        return booked;
+    }
+
+    public void shippedToDelivery(ShippedToDeliveryRequest request) {
+        OrderBooking booking = orderBookingRepository.findByOrderId(request.getOrderId())
+                .orElseThrow(() -> new OrderBookingNotFoundException("Booking not found for order: " + request.getOrderId()));
+        booking.setDeliveryId(request.getDeliveryId());
+        orderBookingRepository.save(booking);
+    }
+
+    public void acceptReturn(Map<UUID, Long> products) {
+        for (Map.Entry<UUID, Long> entry : products.entrySet()) {
+            UUID productId = entry.getKey();
+            long qty = entry.getValue();
+            WarehouseProduct wp = warehouseRepository.findByProductId(productId).orElse(null);
+            if (wp != null) {
+                wp.setQuantity(wp.getQuantity() + qty);
+                warehouseRepository.save(wp);
+            } else {
+                log.warn("Return for non-existent product ignored: {}", productId);
+            }
+        }
+    }
+
+    private BookedProductsDto calculateBookedProducts(Map<UUID, Long> products) {
+        double totalWeight = 0;
+        double totalVolume = 0;
+        boolean fragile = false;
+        for (Map.Entry<UUID, Long> entry : products.entrySet()) {
+            WarehouseProduct wp = warehouseRepository.findByProductId(entry.getKey())
+                    .orElseThrow(() -> new ProductInShoppingCartNotInWarehouse("Product not found in warehouse"));
+            long qty = entry.getValue();
+            totalWeight += wp.getWeight() * qty;
+            double vol = wp.getDimension().getWidth() * wp.getDimension().getHeight() * wp.getDimension().getDepth();
+            totalVolume += vol * qty;
+            if (wp.isFragile()) fragile = true;
+        }
+        return BookedProductsDto.builder()
+                .deliveryWeight(totalWeight)
+                .deliveryVolume(totalVolume)
+                .fragile(fragile)
                 .build();
     }
 }

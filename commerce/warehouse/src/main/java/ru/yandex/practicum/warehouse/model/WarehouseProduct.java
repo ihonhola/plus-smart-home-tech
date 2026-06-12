@@ -20,7 +20,11 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "warehouse_products")
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class WarehouseProduct {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
